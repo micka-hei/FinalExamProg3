@@ -3,7 +3,9 @@ package com.examen.hei.service;
 import com.examen.hei.model.*;
 import com.examen.hei.repository.DatabaseSimulator;
 import org.springframework.stereotype.Service;
+import com.examen.hei.model.enums.ActivityStatus;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,5 +100,67 @@ public class MemberService {
         if (db.members.values().stream().anyMatch(m -> m.getPhoneNumber().equals(request.getPhoneNumber()))) {
             throw new IllegalArgumentException("Phone number already exists: " + request.getPhoneNumber());
         }
+    }
+
+
+
+
+    public List<MemberPayment> createPayments(String memberId, List<CreateMemberPayment> requests) {
+        List<MemberPayment> created = new ArrayList<>();
+
+        // Vérifier que le membre existe
+        Member member = db.findMemberById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + memberId));
+
+        // Trouver la collectivité du membre (simplifié)
+        String collectivityId = findCollectivityIdByMember(member);
+
+        for (CreateMemberPayment request : requests) {
+            // Vérifier que la cotisation existe et est ACTIVE
+            MembershipFee fee = db.findMembershipFeeById(request.getMembershipFeeIdentifier())
+                    .orElseThrow(() -> new IllegalArgumentException("Membership fee not found: " + request.getMembershipFeeIdentifier()));
+
+            if (fee.getStatus() != ActivityStatus.ACTIVE) {
+                throw new IllegalArgumentException("Membership fee is not active");
+            }
+
+            // Vérifier que le compte crédité existe
+            FinancialAccount account = db.findFinancialAccountById(request.getAccountCreditedIdentifier())
+                    .orElseThrow(() -> new IllegalArgumentException("Financial account not found: " + request.getAccountCreditedIdentifier()));
+
+            // Créer le payment
+            MemberPayment payment = new MemberPayment();
+            payment.setId(db.generatePaymentId());
+            payment.setAmount(request.getAmount());
+            payment.setPaymentMode(request.getPaymentMode());
+            payment.setAccountCredited(account);
+            payment.setCreationDate(LocalDate.now());
+
+            db.saveMemberPayment(payment);
+            created.add(payment);
+
+            // Créer automatiquement une transaction pour la collectivité
+            CollectivityTransaction transaction = new CollectivityTransaction();
+            transaction.setId(db.generateTransactionId());
+            transaction.setCreationDate(LocalDate.now());
+            transaction.setAmount(request.getAmount().doubleValue());
+            transaction.setPaymentMode(request.getPaymentMode());
+            transaction.setAccountCredited(account);
+            transaction.setMemberDebited(member);
+
+            db.saveTransaction(transaction);
+        }
+
+        return created;
+    }
+
+    private String findCollectivityIdByMember(Member member) {
+        // Simplifié - dans la vraie logique, le membre a un lien vers sa collectivité
+        for (Collectivity c : db.collectivities.values()) {
+            if (c.getMembers().stream().anyMatch(m -> m.getId().getId().equals(member.getId().getId()))) {
+                return c.getId();
+            }
+        }
+        throw new IllegalArgumentException("Member not associated with any collectivity");
     }
 }

@@ -1,9 +1,11 @@
 package com.examen.hei.service;
 
 import com.examen.hei.model.*;
+import com.examen.hei.model.enums.ActivityStatus;
 import com.examen.hei.repository.DatabaseSimulator;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,5 +135,68 @@ public class CollectivityService {
 
         // 6. Retourner la collectivité mise à jour
         return db.findCollectivityById(collectivityId).get();
+    }
+
+
+
+    // Ajoutez ces méthodes dans CollectivityService.java
+
+    public List<MembershipFee> getMembershipFees(String collectivityId) {
+        // Vérifier que la collectivité existe
+        if (!db.findCollectivityById(collectivityId).isPresent()) {
+            throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
+        }
+
+        return db.findMembershipFeesByCollectivityId(collectivityId);
+    }
+
+    public List<MembershipFee> createMembershipFees(String collectivityId, List<CreateMembershipFee> requests) {
+        // Vérifier que la collectivité existe
+        if (!db.findCollectivityById(collectivityId).isPresent()) {
+            throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
+        }
+
+        List<MembershipFee> created = new ArrayList<>();
+
+        for (CreateMembershipFee request : requests) {
+            // Validation
+            if (request.getAmount() == null || request.getAmount() <= 0) {
+                throw new IllegalArgumentException("Amount must be greater than 0");
+            }
+            if (request.getFrequency() == null) {
+                throw new IllegalArgumentException("Frequency is required");
+            }
+
+            MembershipFee fee = new MembershipFee();
+            fee.setId(db.generateMembershipFeeId());
+            fee.setEligibleFrom(request.getEligibleFrom());
+            fee.setFrequency(request.getFrequency());
+            fee.setAmount(request.getAmount());
+            fee.setLabel(request.getLabel());
+            fee.setStatus(ActivityStatus.ACTIVE);
+
+            db.saveMembershipFee(fee);
+            created.add(fee);
+        }
+
+        return created;
+    }
+
+    public List<CollectivityTransaction> getTransactions(String collectivityId, LocalDate from, LocalDate to) {
+        // Vérifier que la collectivité existe
+        if (!db.findCollectivityById(collectivityId).isPresent()) {
+            throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
+        }
+
+        // Validation des dates
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("Both 'from' and 'to' dates are required");
+        }
+
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("'from' date cannot be after 'to' date");
+        }
+
+        return db.findTransactionsByCollectivityIdAndDateRange(collectivityId, from, to);
     }
 }
