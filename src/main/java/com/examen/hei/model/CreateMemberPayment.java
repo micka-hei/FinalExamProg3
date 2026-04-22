@@ -8,7 +8,7 @@ public class CreateMemberPayment {
     private String accountCreditedIdentifier;
     private PaymentMode paymentMode;
 
-    // Getters et Setters
+
     public Integer getAmount() { return amount; }
     public void setAmount(Integer amount) { this.amount = amount; }
     public String getMembershipFeeIdentifier() { return membershipFeeIdentifier; }

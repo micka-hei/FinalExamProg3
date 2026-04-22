@@ -9,7 +9,6 @@ public class OfficialIdentifierRequest {
 
     private String name;
 
-    // Getters et Setters
     public String getNumber() {
         return number;
     }

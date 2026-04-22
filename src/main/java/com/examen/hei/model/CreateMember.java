@@ -8,7 +8,6 @@ public class CreateMember extends MemberInformation {
     private Boolean registrationFeePaid;
     private Boolean membershipDuesPaid;
 
-    // Getters et Setters
     public String getCollectivityIdentifier() { return collectivityIdentifier; }
     public void setCollectivityIdentifier(String collectivityIdentifier) { this.collectivityIdentifier = collectivityIdentifier; }
     public List<MemberIdentifier> getReferees() { return referees; }

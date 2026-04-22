@@ -11,7 +11,6 @@ public class MemberPayment {
     private FinancialAccount accountCredited;
     private LocalDate creationDate;
 
-    // Getters et Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public Integer getAmount() { return amount; }

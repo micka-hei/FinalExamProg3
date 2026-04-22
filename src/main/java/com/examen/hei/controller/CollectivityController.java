@@ -27,7 +27,6 @@ public class CollectivityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // ========== NOUVEL ENDPOINT ==========
     @PutMapping("/{collectivityId}/official-identifier")
     public ResponseEntity<Collectivity> assignOfficialIdentifier(
             @PathVariable String collectivityId,
@@ -36,7 +35,6 @@ public class CollectivityController {
         return ResponseEntity.ok(updated);
     }
 
-    // Ajoutez ces endpoints dans CollectivityController.java
 
     @GetMapping("/{id}/membershipFees")
     public ResponseEntity<List<MembershipFee>> getMembershipFees(@PathVariable String id) {

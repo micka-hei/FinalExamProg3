@@ -7,7 +7,6 @@ public class MobileBankingAccount extends FinancialAccount {
     private MobileBankingService mobileBankingService;
     private String mobileNumber;
 
-    // Getters et Setters
     public String getHolderName() { return holderName; }
     public void setHolderName(String holderName) { this.holderName = holderName; }
     public MobileBankingService getMobileBankingService() { return mobileBankingService; }

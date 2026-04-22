@@ -29,7 +29,6 @@ public class MemberController {
     }
 
 
-    // Ajoutez cet endpoint dans MemberController.java
 
     @PostMapping("/{id}/payments")
     public ResponseEntity<List<MemberPayment>> createPayments(

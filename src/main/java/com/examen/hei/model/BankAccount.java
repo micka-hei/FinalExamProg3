@@ -10,7 +10,7 @@ public class BankAccount extends FinancialAccount {
     private String bankAccountNumber;
     private Integer bankAccountKey;
 
-    // Getters et Setters
+
     public String getHolderName() { return holderName; }
     public void setHolderName(String holderName) { this.holderName = holderName; }
     public Bank getBankName() { return bankName; }

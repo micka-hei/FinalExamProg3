@@ -10,7 +10,7 @@ public class CreateMembershipFee {
     private Double amount;
     private String label;
 
-    // Getters et Setters
+
     public LocalDate getEligibleFrom() { return eligibleFrom; }
     public void setEligibleFrom(LocalDate eligibleFrom) { this.eligibleFrom = eligibleFrom; }
     public Frequency getFrequency() { return frequency; }

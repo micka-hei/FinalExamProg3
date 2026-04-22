@@ -53,8 +53,6 @@ public class CollectivityService {
             collectivity.setLocation(request.getLocation());
             collectivity.setMembers(members);
             collectivity.setStructure(structure);
-            // Note: officialNumber et officialName ne sont pas attribués ici
-            // Ils le seront via l'endpoint PUT
 
             db.saveCollectivity(collectivity);
             created.add(collectivity);
@@ -81,19 +79,14 @@ public class CollectivityService {
         }
     }
 
-    // ========== NOUVELLE MÉTHODE POUR L'ATTRIBUTION D'IDENTIFIANT OFFICIEL ==========
-
     public Collectivity assignOfficialIdentifier(String collectivityId, OfficialIdentifierRequest request) {
-        // 1. Vérifier que la collectivité existe
         Collectivity collectivity = db.findCollectivityById(collectivityId)
                 .orElseThrow(() -> new IllegalArgumentException("Collectivity not found: " + collectivityId));
 
-        // 2. Vérifier qu'on ne modifie pas un numéro déjà attribué
         if (request.getNumber() != null && db.hasOfficialNumber(collectivityId)) {
             throw new IllegalStateException("Cannot modify official number. Collectivity already has an official number.");
         }
 
-        // 3. Vérifier qu'on ne modifie pas un nom déjà attribué
         if (request.getName() != null && db.hasOfficialName(collectivityId)) {
             throw new IllegalStateException("Cannot modify official name. Collectivity already has an official name.");
         }
@@ -101,26 +94,22 @@ public class CollectivityService {
         String officialNumber = request.getNumber();
         String officialName = request.getName();
 
-        // 4. Logique d'attribution
         if (officialNumber == null && officialName == null) {
             throw new IllegalArgumentException("At least one of number or name must be provided");
         }
 
-        // Cas 1: Seulement le nom est fourni -> générer le numéro
         if (officialNumber == null && officialName != null) {
             if (db.existsByOfficialName(officialName)) {
                 throw new IllegalArgumentException("Official name already exists: " + officialName);
             }
             officialNumber = db.generateNextOfficialNumber();
         }
-        // Cas 2: Seulement le numéro est fourni -> générer le nom
         else if (officialNumber != null && officialName == null) {
             if (db.existsByOfficialNumber(officialNumber)) {
                 throw new IllegalArgumentException("Official number already exists: " + officialNumber);
             }
             officialName = db.generateUniqueNameFromLocation(collectivityId);
         }
-        // Cas 3: Les deux sont fournis -> vérifier les deux
         else {
             if (db.existsByOfficialNumber(officialNumber)) {
                 throw new IllegalArgumentException("Official number already exists: " + officialNumber);
@@ -130,10 +119,7 @@ public class CollectivityService {
             }
         }
 
-        // 5. Sauvegarder
         db.updateOfficialIdentifiers(collectivityId, officialNumber, officialName);
-
-        // 6. Retourner la collectivité mise à jour
         return db.findCollectivityById(collectivityId).get();
     }
 

@@ -8,7 +8,6 @@ public class CreateCollectivity {
     private Boolean federationApproval;
     private CreateCollectivityStructure structure;
 
-    // Getters et Setters
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
     public List<MemberIdentifier> getMembers() { return members; }
