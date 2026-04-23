@@ -19,7 +19,7 @@ public class FinancialAccountController {
 
     @GetMapping
     public ResponseEntity<Collection<FinancialAccount>> getAllAccounts() {
-        return ResponseEntity.ok(db.financialAccounts.values());
+        return ResponseEntity.ok(db.findAllFinancialAccounts());
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,6 @@
 package com.examen.hei.model;
 
-import com.examen.hei.model.enums.Frequency;
+import com.examen.hei.enums.Frequency;
 
 import java.time.LocalDate;
 

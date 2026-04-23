@@ -1,6 +1,6 @@
 package com.examen.hei.model;
 
-import com.examen.hei.model.enums.MobileBankingService;
+import com.examen.hei.enums.MobileBankingService;
 
 public class MobileBankingAccount extends FinancialAccount {
     private String holderName;

@@ -1,8 +1,6 @@
 package com.examen.hei.model;
 
-import com.examen.hei.model.enums.ActivityStatus;
-
-import java.time.LocalDate;
+import com.examen.hei.enums.ActivityStatus;
 
 public class MembershipFee extends CreateMembershipFee {
     private String id;

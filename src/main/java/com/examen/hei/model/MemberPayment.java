@@ -1,6 +1,6 @@
 package com.examen.hei.model;
 
-import com.examen.hei.model.enums.PaymentMode;
+import com.examen.hei.enums.PaymentMode;
 
 import java.time.LocalDate;
 

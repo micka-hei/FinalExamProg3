@@ -1,7 +1,7 @@
 package com.examen.hei.service;
 
 import com.examen.hei.model.*;
-import com.examen.hei.model.enums.ActivityStatus;
+import com.examen.hei.enums.ActivityStatus;
 import com.examen.hei.repository.DatabaseSimulator;
 import org.springframework.stereotype.Service;
 
@@ -126,12 +126,7 @@ public class CollectivityService {
         return db.findCollectivityById(collectivityId).get();
     }
 
-
-
-    // Ajoutez ces méthodes dans CollectivityService.java
-
     public List<MembershipFee> getMembershipFees(String collectivityId) {
-        // Vérifier que la collectivité existe
         if (!db.findCollectivityById(collectivityId).isPresent()) {
             throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
         }
@@ -140,7 +135,6 @@ public class CollectivityService {
     }
 
     public List<MembershipFee> createMembershipFees(String collectivityId, List<CreateMembershipFee> requests) {
-        // Vérifier que la collectivité existe
         if (!db.findCollectivityById(collectivityId).isPresent()) {
             throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
         }
@@ -148,7 +142,6 @@ public class CollectivityService {
         List<MembershipFee> created = new ArrayList<>();
 
         for (CreateMembershipFee request : requests) {
-            // Validation
             if (request.getAmount() == null || request.getAmount() <= 0) {
                 throw new IllegalArgumentException("Amount must be greater than 0");
             }
@@ -172,12 +165,10 @@ public class CollectivityService {
     }
 
     public List<CollectivityTransaction> getTransactions(String collectivityId, LocalDate from, LocalDate to) {
-        // Vérifier que la collectivité existe
         if (!db.findCollectivityById(collectivityId).isPresent()) {
             throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
         }
 
-        // Validation des dates
         if (from == null || to == null) {
             throw new IllegalArgumentException("Both 'from' and 'to' dates are required");
         }

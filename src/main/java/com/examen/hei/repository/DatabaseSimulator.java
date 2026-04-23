@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Repository
 public class DatabaseSimulator {
@@ -33,40 +32,19 @@ public class DatabaseSimulator {
     public String generateTransactionId() { return "TXN-" + transactionIdGen.getAndIncrement(); }
     public String generateAccountId() { return "ACC-" + accountIdGen.getAndIncrement(); }
 
-
-    public void clearAllData() {
-        collectivities.clear();
-        members.clear();
-        membershipFees.clear();
-        memberPayments.clear();
-        transactions.clear();
-        financialAccounts.clear();
-
-        collectivityIdGen.set(1);
-        memberIdGen.set(1);
-        officialNumberSeq.set(1);
-        membershipFeeIdGen.set(1);
-        paymentIdGen.set(1);
-        transactionIdGen.set(1);
-        accountIdGen.set(1);
-
-        initData();
-    }
-
     @PostConstruct
     public void initData() {
-        System.out.println("=== Base de données initialisée ===");
-    }
-
-    public CashAccount createCashAccountForCollectivity(String collectivityId) {
+        // Créer un unique compte caisse
         CashAccount cashAccount = new CashAccount();
         cashAccount.setId(generateAccountId());
-        cashAccount.setAmount(0.0);
-        cashAccount.setCollectivityId(collectivityId);
+        cashAccount.setAmount(1000000.0);
         financialAccounts.put(cashAccount.getId(), cashAccount);
-        return cashAccount;
+
+        System.out.println("=== Compte caisse créé ===");
+        System.out.println("  - " + cashAccount.getId() + " : Caisse (solde: " + cashAccount.getAmount() + " MGA)");
     }
 
+    // Méthodes existantes
     public Optional<Member> findMemberById(String id) {
         return Optional.ofNullable(members.get(id));
     }
@@ -166,33 +144,12 @@ public class DatabaseSimulator {
         return Optional.ofNullable(financialAccounts.get(id));
     }
 
-
-    public List<FinancialAccount> findFinancialAccountsByCollectivityId(String collectivityId) {
-        return financialAccounts.values().stream()
-                .filter(account -> collectivityId.equals(account.getCollectivityId()))
-                .collect(Collectors.toList());
-    }
-
     public List<CollectivityTransaction> findTransactionsByCollectivityIdAndDateRange(
             String collectivityId, java.time.LocalDate from, java.time.LocalDate to) {
         return transactions.values().stream()
-                .filter(txn -> txn.getMemberDebited() != null)
-                .filter(txn -> {
-                    String memberCollectivityId = findCollectivityIdByMember(txn.getMemberDebited());
-                    return collectivityId.equals(memberCollectivityId);
-                })
                 .filter(txn -> txn.getCreationDate() != null &&
                         !txn.getCreationDate().isBefore(from) &&
                         !txn.getCreationDate().isAfter(to))
-                .collect(Collectors.toList());
-    }
-
-    private String findCollectivityIdByMember(Member member) {
-        return collectivities.values().stream()
-                .filter(c -> c.getMembers().stream()
-                        .anyMatch(m -> m.getId().getId().equals(member.getId().getId())))
-                .map(Collectivity::getId)
-                .findFirst()
-                .orElse(null);
+                .toList();
     }
 }

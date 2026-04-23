@@ -1,0 +1,30 @@
+[
+  {
+    "firstName": "Jean",
+    "lastName": "Rakoto",
+    "birthDate": "1990-05-15",
+    "gender": "MALE",
+    "address": "Antananarivo",
+    "profession": "Agriculteur",
+    "phoneNumber": "0341234501",
+    "email": "jean.rakoto@test.com",
+    "occupation": "SENIOR",
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true,
+    "referees": []
+  },
+  {
+    "firstName": "Marie",
+    "lastName": "Rabe",
+    "birthDate": "1985-03-20",
+    "gender": "FEMALE",
+    "address": "Antananarivo",
+    "profession": "Commerçante",
+    "phoneNumber": "0341234502",
+    "email": "marie.rabe@test.com",
+    "occupation": "SENIOR",
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true,
+    "referees": []
+  }
+]

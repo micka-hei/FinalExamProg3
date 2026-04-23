@@ -3,7 +3,7 @@ package com.examen.hei.service;
 import com.examen.hei.model.*;
 import com.examen.hei.repository.DatabaseSimulator;
 import org.springframework.stereotype.Service;
-import com.examen.hei.model.enums.ActivityStatus;
+import com.examen.hei.enums.ActivityStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class MemberService {
         List<Member> created = new ArrayList<>();
 
         System.out.println("=== Création de " + requests.size() + " membre(s) ===");
-        System.out.println("Nombre de membres existants dans la base: " + db.members.size());
+        System.out.println("Nombre de membres existants dans la base: " + db.findAllMembers().size());
 
         for (CreateMember request : requests) {
             System.out.println("Traitement du membre: " + request.getFirstName() + " " + request.getLastName());
@@ -57,7 +57,7 @@ public class MemberService {
             System.out.println("  -> Créé avec ID: " + member.getId().getId());
         }
 
-        System.out.println("=== Fin création, total membres: " + db.members.size() + " ===");
+        System.out.println("=== Fin création, total membres: " + db.findAllMembers().size() + " ===");
         return created;
     }
 
@@ -70,14 +70,12 @@ public class MemberService {
             throw new IllegalArgumentException("Annual membership dues must be paid in full");
         }
 
-
-        int existingMembersCount = db.members.size();
+        int existingMembersCount = db.findAllMembers().size();
         System.out.println("  - Membres existants avant validation: " + existingMembersCount);
 
         boolean isFirstOrSecondMember = existingMembersCount < 2;
 
         if (!isFirstOrSecondMember) {
-            // À partir du 3ème membre, au moins 2 parrains sont requis
             if (request.getReferees() == null || request.getReferees().size() < 2) {
                 throw new IllegalArgumentException("At least 2 referees are required. Current referees: " +
                         (request.getReferees() != null ? request.getReferees().size() : 0));
@@ -87,17 +85,14 @@ public class MemberService {
             System.out.println("  - Premier/Deuxième membre: pas de vérification des parrains");
         }
 
-        if (db.members.values().stream().anyMatch(m -> m.getEmail().equals(request.getEmail()))) {
+        if (db.findAllMembers().stream().anyMatch(m -> m.getEmail().equals(request.getEmail()))) {
             throw new IllegalArgumentException("Email already exists: " + request.getEmail());
         }
 
-        if (db.members.values().stream().anyMatch(m -> m.getPhoneNumber().equals(request.getPhoneNumber()))) {
+        if (db.findAllMembers().stream().anyMatch(m -> m.getPhoneNumber().equals(request.getPhoneNumber()))) {
             throw new IllegalArgumentException("Phone number already exists: " + request.getPhoneNumber());
         }
     }
-
-
-
 
     public List<MemberPayment> createPayments(String memberId, List<CreateMemberPayment> requests) {
         List<MemberPayment> created = new ArrayList<>();
@@ -117,6 +112,7 @@ public class MemberService {
 
             FinancialAccount account = db.findFinancialAccountById(request.getAccountCreditedIdentifier())
                     .orElseThrow(() -> new IllegalArgumentException("Financial account not found: " + request.getAccountCreditedIdentifier()));
+
             MemberPayment payment = new MemberPayment();
             payment.setId(db.generatePaymentId());
             payment.setAmount(request.getAmount());
@@ -126,6 +122,7 @@ public class MemberService {
 
             db.saveMemberPayment(payment);
             created.add(payment);
+
             CollectivityTransaction transaction = new CollectivityTransaction();
             transaction.setId(db.generateTransactionId());
             transaction.setCreationDate(LocalDate.now());
@@ -141,8 +138,8 @@ public class MemberService {
     }
 
     private String findCollectivityIdByMember(Member member) {
-        for (Collectivity c : db.collectivities.values()) {
-            if (c.getMembers().stream().anyMatch(m -> m.getId().getId().equals(member.getId().getId()))) {
+        for (Collectivity c : db.findAllCollectivities()) {
+            if (c.getMembers() != null && c.getMembers().stream().anyMatch(m -> m.getId().getId().equals(member.getId().getId()))) {
                 return c.getId();
             }
         }

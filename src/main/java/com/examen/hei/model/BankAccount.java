@@ -1,6 +1,6 @@
 package com.examen.hei.model;
 
-import com.examen.hei.model.enums.Bank;
+import com.examen.hei.enums.Bank;
 
 public class BankAccount extends FinancialAccount {
     private String holderName;

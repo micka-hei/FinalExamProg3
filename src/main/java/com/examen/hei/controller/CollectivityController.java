@@ -27,6 +27,7 @@ public class CollectivityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+
     @PutMapping("/{collectivityId}/official-identifier")
     public ResponseEntity<Collectivity> assignOfficialIdentifier(
             @PathVariable String collectivityId,
@@ -48,6 +49,12 @@ public class CollectivityController {
             @Valid @RequestBody List<CreateMembershipFee> requests) {
         List<MembershipFee> created = collectivityService.createMembershipFees(id, requests);
         return ResponseEntity.ok(created);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Collectivity> getCollectivityById(@PathVariable String id) {
+        return db.findCollectivityById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/transactions")

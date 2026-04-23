@@ -1,4 +1,4 @@
-package com.examen.hei.model.enums;
+package com.examen.hei.enums;
 
 public enum ActivityStatus {
     ACTIVE, INACTIVE
