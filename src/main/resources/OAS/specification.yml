@@ -467,3 +467,53 @@
           - CASH
           - MOBILE_BANKING
           - BANK_TRANSFER
+
+    # À ajouter dans la section paths: après /collectivities/{id}/transactions
+
+    '/collectivities/{id}':
+      get:
+        summary: Get collectivity by ID
+        parameters:
+          - in: path
+            name: id
+            schema:
+              type: string
+            required: true
+        responses:
+          200:
+            description: Collectivity found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Collectivity'
+          404:
+            description: Collectivity not found
+
+    '/collectivities/{id}/financialAccounts':
+      get:
+        summary: Get financial accounts of a collectivity
+        description: Returns all financial accounts (cash, mobile banking, bank accounts) for a specific collectivity with current balance
+        parameters:
+          - in: path
+            name: id
+            schema:
+              type: string
+            required: true
+          - in: query
+            name: at
+            schema:
+              type: string
+              format: date
+            required: false
+            description: Date to get account balances (optional, returns current balance if not provided)
+        responses:
+          200:
+            description: List of financial accounts
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FinancialAccount'
+          404:
+            description: Collectivity not found

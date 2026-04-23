@@ -58,4 +58,18 @@ public class CollectivityController {
         List<CollectivityTransaction> transactions = collectivityService.getTransactions(id, from, to);
         return ResponseEntity.ok(transactions);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Collectivity> getCollectivityById(@PathVariable String id) {
+        Collectivity collectivity = collectivityService.getCollectivityById(id);
+        return ResponseEntity.ok(collectivity);
+    }
+
+    @GetMapping("/{id}/financialAccounts")
+    public ResponseEntity<List<FinancialAccount>> getFinancialAccounts(
+            @PathVariable String id,
+            @RequestParam(required = false) LocalDate at) {
+        List<FinancialAccount> accounts = collectivityService.getFinancialAccounts(id, at);
+        return ResponseEntity.ok(accounts);
+    }
 }
