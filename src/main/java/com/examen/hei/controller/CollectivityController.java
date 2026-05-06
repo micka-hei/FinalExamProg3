@@ -1,6 +1,7 @@
 package com.examen.hei.controller;
 
 import com.examen.hei.model.*;
+import com.examen.hei.repository.DatabaseSimulator;
 import com.examen.hei.service.CollectivityService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,9 +16,11 @@ import java.util.List;
 public class CollectivityController {
 
     private final CollectivityService collectivityService;
+    private final DatabaseSimulator db;
 
-    public CollectivityController(CollectivityService collectivityService) {
+    public CollectivityController(CollectivityService collectivityService, DatabaseSimulator db) {
         this.collectivityService = collectivityService;
+        this.db = db;
     }
 
     @PostMapping
@@ -27,7 +30,6 @@ public class CollectivityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-
     @PutMapping("/{collectivityId}/official-identifier")
     public ResponseEntity<Collectivity> assignOfficialIdentifier(
             @PathVariable String collectivityId,
@@ -36,6 +38,17 @@ public class CollectivityController {
         return ResponseEntity.ok(updated);
     }
 
+    @GetMapping
+    public ResponseEntity<List<Collectivity>> getAllCollectivities() {
+        return ResponseEntity.ok(db.findAllCollectivities());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Collectivity> getCollectivityById(@PathVariable String id) {
+        return collectivityService.getCollectivityById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/{id}/membershipFees")
     public ResponseEntity<List<MembershipFee>> getMembershipFees(@PathVariable String id) {
@@ -50,11 +63,13 @@ public class CollectivityController {
         List<MembershipFee> created = collectivityService.createMembershipFees(id, requests);
         return ResponseEntity.ok(created);
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<Collectivity> getCollectivityById(@PathVariable String id) {
-        return db.findCollectivityById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+    @GetMapping("/{id}/financialAccounts")
+    public ResponseEntity<List<FinancialAccount>> getFinancialAccounts(
+            @PathVariable String id,
+            @RequestParam(required = false) LocalDate at) {
+        List<FinancialAccount> accounts = collectivityService.getFinancialAccounts(id, at);
+        return ResponseEntity.ok(accounts);
     }
 
     @GetMapping("/{id}/transactions")
@@ -64,19 +79,5 @@ public class CollectivityController {
             @RequestParam LocalDate to) {
         List<CollectivityTransaction> transactions = collectivityService.getTransactions(id, from, to);
         return ResponseEntity.ok(transactions);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Collectivity> getCollectivityById(@PathVariable String id) {
-        Collectivity collectivity = collectivityService.getCollectivityById(id);
-        return ResponseEntity.ok(collectivity);
-    }
-
-    @GetMapping("/{id}/financialAccounts")
-    public ResponseEntity<List<FinancialAccount>> getFinancialAccounts(
-            @PathVariable String id,
-            @RequestParam(required = false) LocalDate at) {
-        List<FinancialAccount> accounts = collectivityService.getFinancialAccounts(id, at);
-        return ResponseEntity.ok(accounts);
     }
 }

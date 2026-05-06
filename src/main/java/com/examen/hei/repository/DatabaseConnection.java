@@ -5,20 +5,15 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
-import jakarta.annotation.PostConstruct;
 
 @Component
 public class DatabaseConnection {
-
-    @PostConstruct
-    public void init() {
-        initializeDatabase();
-    }
 
     private final DataSource dataSource;
 
     public DatabaseConnection(DataSource dataSource) {
         this.dataSource = dataSource;
+        System.out.println("=== DatabaseConnection initialisée avec PostgreSQL ===");
         initializeDatabase();
     }
 
@@ -28,7 +23,6 @@ public class DatabaseConnection {
     }
 
     private void createTables() {
-        System.out.println("=== CRÉATION DES TABLES ===");
         String[] createTableStatements = {
                 """
                 CREATE TABLE IF NOT EXISTS sequences (
@@ -85,7 +79,7 @@ public class DatabaseConnection {
                     id VARCHAR(50) PRIMARY KEY,
                     eligible_from DATE,
                     frequency VARCHAR(20),
-                    amount DOUBLE,
+                    amount DOUBLE PRECISION,
                     label VARCHAR(255),
                     status VARCHAR(20)
                 )
@@ -94,7 +88,7 @@ public class DatabaseConnection {
                 CREATE TABLE IF NOT EXISTS financial_accounts (
                     id VARCHAR(50) PRIMARY KEY,
                     type VARCHAR(20),
-                    amount DOUBLE,
+                    amount DOUBLE PRECISION,
                     holder_name VARCHAR(255),
                     bank_name VARCHAR(50),
                     bank_code INTEGER,
@@ -102,7 +96,8 @@ public class DatabaseConnection {
                     bank_account_number VARCHAR(50),
                     bank_account_key INTEGER,
                     mobile_service VARCHAR(50),
-                    mobile_number VARCHAR(50)
+                    mobile_number VARCHAR(50),
+                    collectivity_id VARCHAR(50)
                 )
                 """,
                 """
@@ -122,7 +117,7 @@ public class DatabaseConnection {
                     collectivity_id VARCHAR(50),
                     member_id VARCHAR(50),
                     creation_date DATE,
-                    amount DOUBLE,
+                    amount DOUBLE PRECISION,
                     payment_mode VARCHAR(20),
                     account_credited_id VARCHAR(50)
                 )
@@ -134,7 +129,7 @@ public class DatabaseConnection {
                 stmt.execute(sql);
             }
             initializeSequences(conn);
-            System.out.println("All tables created successfully");
+            System.out.println("All tables created successfully with PostgreSQL");
         } catch (SQLException e) {
             System.err.println("Error creating tables: " + e.getMessage());
             e.printStackTrace();
@@ -143,19 +138,20 @@ public class DatabaseConnection {
 
     private void initializeSequences(Connection conn) {
         String[] sequences = {"collectivity", "member", "fee", "payment", "transaction", "account", "official_number"};
-        String sql = "MERGE INTO sequences (name, current_value) KEY(name) VALUES (?, 0)";  // 0 au lieu de 1
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            for (String seq : sequences) {
-                pstmt.setString(1, seq);
-                pstmt.executeUpdate();
+        for (String seq : sequences) {
+            String createSeqSql = "CREATE SEQUENCE IF NOT EXISTS seq_" + seq + " START WITH 1";
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(createSeqSql);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        System.out.println("Sequences initialized");
     }
 
     private void initializeDefaultData() {
+        // Vérifier si le compte caisse existe déjà
         String checkSql = "SELECT COUNT(*) FROM financial_accounts WHERE type = 'CASH'";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(checkSql);
@@ -207,9 +203,8 @@ public class DatabaseConnection {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
                     for (int i = 1; i <= columnCount; i++) {
-                        String columnName = metaData.getColumnName(i);
-                        Object value = rs.getObject(i);
-                        row.put(columnName.toLowerCase(), value);  // Ajouter toLowerCase()
+                        String columnName = metaData.getColumnName(i).toLowerCase();
+                        row.put(columnName, rs.getObject(i));
                     }
                     results.add(row);
                 }
@@ -223,33 +218,24 @@ public class DatabaseConnection {
     }
 
     public String generateId(String sequenceName) {
-        String updateSql = "UPDATE sequences SET current_value = current_value + 1 WHERE name = ?";
-        String selectSql = "SELECT current_value FROM sequences WHERE name = ?";
+        String selectSql = "SELECT nextval('seq_" + sequenceName + "')";
 
-        try (Connection conn = dataSource.getConnection()) {
-            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                updateStmt.setString(1, sequenceName);
-                updateStmt.executeUpdate();
-            }
-
-            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
-                selectStmt.setString(1, sequenceName);
-                try (ResultSet rs = selectStmt.executeQuery()) {
-                    if (rs.next()) {
-                        int value = rs.getInt(1);
-                        String prefix = switch (sequenceName) {
-                            case "collectivity" -> "COL";
-                            case "member" -> "MEM";
-                            case "fee" -> "FEE";
-                            case "payment" -> "PAY";
-                            case "transaction" -> "TXN";
-                            case "account" -> "ACC";
-                            case "official_number" -> "OFF";
-                            default -> "SEQ";
-                        };
-                        return prefix + "-" + value;
-                    }
-                }
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+             ResultSet rs = selectStmt.executeQuery()) {
+            if (rs.next()) {
+                int value = rs.getInt(1);
+                String prefix = switch (sequenceName) {
+                    case "collectivity" -> "COL";
+                    case "member" -> "MEM";
+                    case "fee" -> "FEE";
+                    case "payment" -> "PAY";
+                    case "transaction" -> "TXN";
+                    case "account" -> "ACC";
+                    case "official_number" -> "OFF";
+                    default -> "SEQ";
+                };
+                return prefix + "-" + value;
             }
         } catch (SQLException e) {
             e.printStackTrace();

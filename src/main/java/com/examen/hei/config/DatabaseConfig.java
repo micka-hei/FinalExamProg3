@@ -18,17 +18,27 @@ public class DatabaseConfig {
         return new DataSource() {
             @Override
             public Connection getConnection() throws SQLException {
+                try {
+                    Class.forName("org.postgresql.Driver");
+                } catch (ClassNotFoundException e) {
+                    throw new SQLException("PostgreSQL Driver not found", e);
+                }
                 return DriverManager.getConnection(
-                        "jdbc:h2:~/federation_db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE",
-                        "sa",
-                        ""
+                        "jdbc:postgresql://localhost:5432/federation_db",
+                        "postgres",
+                        "postgres123"
                 );
             }
 
             @Override
             public Connection getConnection(String username, String password) throws SQLException {
+                try {
+                    Class.forName("org.postgresql.Driver");
+                } catch (ClassNotFoundException e) {
+                    throw new SQLException("PostgreSQL Driver not found", e);
+                }
                 return DriverManager.getConnection(
-                        "jdbc:h2:~/federation_db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE",
+                        "jdbc:postgresql://localhost:5432/federation_db",
                         username,
                         password
                 );

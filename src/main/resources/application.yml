@@ -5,17 +5,15 @@ spring:
   application:
     name: federation-api
   datasource:
-    url: jdbc:h2:~/federation_db
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/federation_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
   sql:
     init:
-      mode: always
-      platform: h2
-  jpa:
+        mode: never
+    jpa:
     defer-datasource-initialization: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    hibernate:
+      ddl-auto: none
+    show-sql: true

@@ -1,0 +1,24 @@
+[
+  {
+    "location": "Antananarivo",
+    "federationApproval": true,
+    "members": [
+      {"id": "MEM-1"},
+      {"id": "MEM-2"},
+      {"id": "MEM-3"},
+      {"id": "MEM-4"},
+      {"id": "MEM-5"},
+      {"id": "MEM-6"},
+      {"id": "MEM-7"},
+      {"id": "MEM-8"},
+      {"id": "MEM-9"},
+      {"id": "MEM-10"}
+    ],
+    "structure": {
+      "president": {"id": "MEM-1"},
+      "vicePresident": {"id": "MEM-2"},
+      "treasurer": {"id": "MEM-3"},
+      "secretary": {"id": "MEM-4"}
+    }
+  }
+]

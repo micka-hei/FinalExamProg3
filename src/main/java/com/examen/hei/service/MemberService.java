@@ -70,9 +70,10 @@ public class MemberService {
             throw new IllegalArgumentException("Annual membership dues must be paid in full");
         }
 
+        // Compter les membres existants AVANT la création
         int existingMembersCount = db.findAllMembers().size();
-        System.out.println("  - Membres existants avant validation: " + existingMembersCount);
 
+        // Les 2 premiers membres n'ont pas besoin de référents
         boolean isFirstOrSecondMember = existingMembersCount < 2;
 
         if (!isFirstOrSecondMember) {
@@ -80,11 +81,9 @@ public class MemberService {
                 throw new IllegalArgumentException("At least 2 referees are required. Current referees: " +
                         (request.getReferees() != null ? request.getReferees().size() : 0));
             }
-            System.out.println("  - Vérification parrains OK: " + request.getReferees().size() + " parrain(s)");
-        } else {
-            System.out.println("  - Premier/Deuxième membre: pas de vérification des parrains");
         }
 
+        // Vérifier les doublons
         if (db.findAllMembers().stream().anyMatch(m -> m.getEmail().equals(request.getEmail()))) {
             throw new IllegalArgumentException("Email already exists: " + request.getEmail());
         }
@@ -115,6 +114,8 @@ public class MemberService {
 
             MemberPayment payment = new MemberPayment();
             payment.setId(db.generatePaymentId());
+            payment.setMemberId(member.getId().getId());  // ← AJOUTER CETTE LIGNE
+            payment.setMembershipFeeId(fee.getId());      // ← AJOUTER CETTE LIGNE
             payment.setAmount(request.getAmount());
             payment.setPaymentMode(request.getPaymentMode());
             payment.setAccountCredited(account);
@@ -130,6 +131,7 @@ public class MemberService {
             transaction.setPaymentMode(request.getPaymentMode());
             transaction.setAccountCredited(account);
             transaction.setMemberDebited(member);
+            transaction.setCollectivityId(collectivityId);  // ← AJOUTER CETTE LIGNE
 
             db.saveTransaction(transaction);
         }

@@ -12,12 +12,29 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class FinancialAccount {
     private String id;
     private Double amount;
-    private String collectivityId;  // NOUVEAU
+    private String collectivityId;
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public Double getAmount() { return amount; }
-    public void setAmount(Double amount) { this.amount = amount; }
-    public String getCollectivityId() { return collectivityId; }
-    public void setCollectivityId(String collectivityId) { this.collectivityId = collectivityId; }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getCollectivityId() {
+        return collectivityId;
+    }
+
+    public void setCollectivityId(String collectivityId) {
+        this.collectivityId = collectivityId;
+    }
 }

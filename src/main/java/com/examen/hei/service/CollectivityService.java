@@ -56,9 +56,7 @@ public class CollectivityService {
             collectivity.setStructure(structure);
 
             db.saveCollectivity(collectivity);
-
-            CashAccount cashAccount = db.createCashAccountForCollectivity(collectivity.getId());
-            System.out.println("Compte caisse créé pour " + collectivity.getId() + " : " + cashAccount.getId());
+            db.createCashAccountForCollectivity(collectivity.getId());
             created.add(collectivity);
         }
 
@@ -126,6 +124,8 @@ public class CollectivityService {
         db.updateOfficialIdentifiers(collectivityId, officialNumber, officialName);
         return db.findCollectivityById(collectivityId).get();
     }
+
+    // Une seule méthode getCollectivityById (supprimez l'autre)
     public Optional<Collectivity> getCollectivityById(String id) {
         return db.findCollectivityById(id);
     }
@@ -134,7 +134,6 @@ public class CollectivityService {
         if (!db.findCollectivityById(collectivityId).isPresent()) {
             throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
         }
-
         return db.findMembershipFeesByCollectivityId(collectivityId);
     }
 
@@ -184,16 +183,10 @@ public class CollectivityService {
         return db.findTransactionsByCollectivityIdAndDateRange(collectivityId, from, to);
     }
 
-    public Collectivity getCollectivityById(String id) {
-        return db.findCollectivityById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Collectivity not found: " + id));
-    }
-
     public List<FinancialAccount> getFinancialAccounts(String collectivityId, LocalDate at) {
         if (!db.findCollectivityById(collectivityId).isPresent()) {
             throw new IllegalArgumentException("Collectivity not found: " + collectivityId);
         }
-
         return db.findFinancialAccountsByCollectivityId(collectivityId);
     }
 }
