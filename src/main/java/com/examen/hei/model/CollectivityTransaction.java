@@ -1,7 +1,6 @@
 package com.examen.hei.model;
 
 import com.examen.hei.enums.PaymentMode;
-
 import java.time.LocalDate;
 
 public class CollectivityTransaction {
@@ -11,6 +10,7 @@ public class CollectivityTransaction {
     private PaymentMode paymentMode;
     private FinancialAccount accountCredited;
     private Member memberDebited;
+    private String collectivityId;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -24,4 +24,6 @@ public class CollectivityTransaction {
     public void setAccountCredited(FinancialAccount accountCredited) { this.accountCredited = accountCredited; }
     public Member getMemberDebited() { return memberDebited; }
     public void setMemberDebited(Member memberDebited) { this.memberDebited = memberDebited; }
+    public String getCollectivityId() { return collectivityId; }
+    public void setCollectivityId(String collectivityId) { this.collectivityId = collectivityId; }
 }

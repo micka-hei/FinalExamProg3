@@ -5,9 +5,15 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class DatabaseConnection {
+
+    @PostConstruct
+    public void init() {
+        initializeDatabase();
+    }
 
     private final DataSource dataSource;
 
@@ -22,129 +28,105 @@ public class DatabaseConnection {
     }
 
     private void createTables() {
+        System.out.println("=== CRÉATION DES TABLES ===");
         String[] createTableStatements = {
                 """
-            CREATE TABLE IF NOT EXISTS collectivities (
-                id VARCHAR(50) PRIMARY KEY,
-                location VARCHAR(255),
-                official_number VARCHAR(50),
-                official_name VARCHAR(255)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS sequences (
+                    name VARCHAR(50) PRIMARY KEY,
+                    current_value INTEGER DEFAULT 1
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS members (
-                id VARCHAR(50) PRIMARY KEY,
-                first_name VARCHAR(100),
-                last_name VARCHAR(100),
-                birth_date DATE,
-                gender VARCHAR(10),
-                address VARCHAR(255),
-                profession VARCHAR(100),
-                phone_number VARCHAR(50),
-                email VARCHAR(100),
-                occupation VARCHAR(50)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS members (
+                    id VARCHAR(50) PRIMARY KEY,
+                    first_name VARCHAR(100),
+                    last_name VARCHAR(100),
+                    birth_date DATE,
+                    gender VARCHAR(10),
+                    address VARCHAR(255),
+                    profession VARCHAR(100),
+                    phone_number VARCHAR(50),
+                    email VARCHAR(100),
+                    occupation VARCHAR(50),
+                    creation_date DATE DEFAULT CURRENT_DATE
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS member_referees (
-                member_id VARCHAR(50),
-                referee_id VARCHAR(50),
-                FOREIGN KEY (member_id) REFERENCES members(id),
-                FOREIGN KEY (referee_id) REFERENCES members(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS collectivities (
+                    id VARCHAR(50) PRIMARY KEY,
+                    location VARCHAR(255),
+                    official_number VARCHAR(50),
+                    official_name VARCHAR(255)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS collectivity_members (
-                collectivity_id VARCHAR(50),
-                member_id VARCHAR(50),
-                FOREIGN KEY (collectivity_id) REFERENCES collectivities(id),
-                FOREIGN KEY (member_id) REFERENCES members(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS member_referees (
+                    member_id VARCHAR(50),
+                    referee_id VARCHAR(50)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS collectivity_structure (
-                collectivity_id VARCHAR(50) PRIMARY KEY,
-                president_id VARCHAR(50),
-                vice_president_id VARCHAR(50),
-                treasurer_id VARCHAR(50),
-                secretary_id VARCHAR(50),
-                FOREIGN KEY (collectivity_id) REFERENCES collectivities(id),
-                FOREIGN KEY (president_id) REFERENCES members(id),
-                FOREIGN KEY (vice_president_id) REFERENCES members(id),
-                FOREIGN KEY (treasurer_id) REFERENCES members(id),
-                FOREIGN KEY (secretary_id) REFERENCES members(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS collectivity_members (
+                    collectivity_id VARCHAR(50),
+                    member_id VARCHAR(50)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS membership_fees (
-                id VARCHAR(50) PRIMARY KEY,
-                collectivity_id VARCHAR(50),
-                eligible_from DATE,
-                frequency VARCHAR(20),
-                amount DOUBLE,
-                label VARCHAR(255),
-                status VARCHAR(20),
-                FOREIGN KEY (collectivity_id) REFERENCES collectivities(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS collectivity_structure (
+                    collectivity_id VARCHAR(50) PRIMARY KEY,
+                    president_id VARCHAR(50),
+                    vice_president_id VARCHAR(50),
+                    treasurer_id VARCHAR(50),
+                    secretary_id VARCHAR(50)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS financial_accounts (
-                id VARCHAR(50) PRIMARY KEY,
-                type VARCHAR(20),
-                amount DOUBLE,
-                holder_name VARCHAR(255),
-                bank_name VARCHAR(50),
-                bank_code INTEGER,
-                bank_branch_code INTEGER,
-                bank_account_number VARCHAR(50),
-                bank_account_key INTEGER,
-                mobile_service VARCHAR(50),
-                mobile_number VARCHAR(50)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS membership_fees (
+                    id VARCHAR(50) PRIMARY KEY,
+                    eligible_from DATE,
+                    frequency VARCHAR(20),
+                    amount DOUBLE,
+                    label VARCHAR(255),
+                    status VARCHAR(20)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS member_payments (
-                id VARCHAR(50) PRIMARY KEY,
-                member_id VARCHAR(50),
-                membership_fee_id VARCHAR(50),
-                amount INTEGER,
-                payment_mode VARCHAR(20),
-                account_credited_id VARCHAR(50),
-                creation_date DATE,
-                FOREIGN KEY (member_id) REFERENCES members(id),
-                FOREIGN KEY (membership_fee_id) REFERENCES membership_fees(id),
-                FOREIGN KEY (account_credited_id) REFERENCES financial_accounts(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS financial_accounts (
+                    id VARCHAR(50) PRIMARY KEY,
+                    type VARCHAR(20),
+                    amount DOUBLE,
+                    holder_name VARCHAR(255),
+                    bank_name VARCHAR(50),
+                    bank_code INTEGER,
+                    bank_branch_code INTEGER,
+                    bank_account_number VARCHAR(50),
+                    bank_account_key INTEGER,
+                    mobile_service VARCHAR(50),
+                    mobile_number VARCHAR(50)
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS transactions (
-                id VARCHAR(50) PRIMARY KEY,
-                collectivity_id VARCHAR(50),
-                member_id VARCHAR(50),
-                creation_date DATE,
-                amount DOUBLE,
-                payment_mode VARCHAR(20),
-                account_credited_id VARCHAR(50),
-                FOREIGN KEY (collectivity_id) REFERENCES collectivities(id),
-                FOREIGN KEY (member_id) REFERENCES members(id),
-                FOREIGN KEY (account_credited_id) REFERENCES financial_accounts(id)
-            )
-            """,
-
+                CREATE TABLE IF NOT EXISTS member_payments (
+                    id VARCHAR(50) PRIMARY KEY,
+                    member_id VARCHAR(50),
+                    membership_fee_id VARCHAR(50),
+                    amount INTEGER,
+                    payment_mode VARCHAR(20),
+                    account_credited_id VARCHAR(50),
+                    creation_date DATE
+                )
+                """,
                 """
-            CREATE TABLE IF NOT EXISTS sequences (
-                name VARCHAR(50) PRIMARY KEY,
-                current_value INTEGER DEFAULT 1
-            )
-            """
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id VARCHAR(50) PRIMARY KEY,
+                    collectivity_id VARCHAR(50),
+                    member_id VARCHAR(50),
+                    creation_date DATE,
+                    amount DOUBLE,
+                    payment_mode VARCHAR(20),
+                    account_credited_id VARCHAR(50)
+                )
+                """
         };
 
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
@@ -152,14 +134,16 @@ public class DatabaseConnection {
                 stmt.execute(sql);
             }
             initializeSequences(conn);
+            System.out.println("All tables created successfully");
         } catch (SQLException e) {
+            System.err.println("Error creating tables: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void initializeSequences(Connection conn) {
         String[] sequences = {"collectivity", "member", "fee", "payment", "transaction", "account", "official_number"};
-        String sql = "MERGE INTO sequences (name, current_value) KEY(name) VALUES (?, 1)";
+        String sql = "MERGE INTO sequences (name, current_value) KEY(name) VALUES (?, 0)";  // 0 au lieu de 1
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (String seq : sequences) {
@@ -201,7 +185,7 @@ public class DatabaseConnection {
             }
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error executing update: " + e.getMessage());
             return 0;
         }
     }
@@ -223,12 +207,15 @@ public class DatabaseConnection {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
                     for (int i = 1; i <= columnCount; i++) {
-                        row.put(metaData.getColumnName(i), rs.getObject(i));
+                        String columnName = metaData.getColumnName(i);
+                        Object value = rs.getObject(i);
+                        row.put(columnName.toLowerCase(), value);  // Ajouter toLowerCase()
                     }
                     results.add(row);
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error executing query: " + e.getMessage());
             e.printStackTrace();
         }
 

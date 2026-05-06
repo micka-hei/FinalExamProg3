@@ -20,8 +20,8 @@ public class DatabaseConfig {
             public Connection getConnection() throws SQLException {
                 return DriverManager.getConnection(
                         "jdbc:h2:~/federation_db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE",
-                        "postgres",
-                        "postgres123"
+                        "sa",
+                        ""
                 );
             }
 

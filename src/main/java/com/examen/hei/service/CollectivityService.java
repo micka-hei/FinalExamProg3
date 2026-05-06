@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CollectivityService {
@@ -124,6 +125,9 @@ public class CollectivityService {
 
         db.updateOfficialIdentifiers(collectivityId, officialNumber, officialName);
         return db.findCollectivityById(collectivityId).get();
+    }
+    public Optional<Collectivity> getCollectivityById(String id) {
+        return db.findCollectivityById(id);
     }
 
     public List<MembershipFee> getMembershipFees(String collectivityId) {
