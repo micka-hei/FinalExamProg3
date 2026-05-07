@@ -111,6 +111,37 @@ public class DatabaseConnection {
                     creation_date DATE
                 )
                 """,
+                // Table activities
+                    """
+                CREATE TABLE IF NOT EXISTS activities (
+                    id VARCHAR(50) PRIMARY KEY,
+                    collectivity_id VARCHAR(50),
+                    label VARCHAR(255),
+                    activity_type VARCHAR(50),
+                    week_ordinal INTEGER,
+                    day_of_week VARCHAR(10),
+                    executive_date DATE
+                )
+                """,
+
+                // Table activity_occupations
+                    """
+                CREATE TABLE IF NOT EXISTS activity_occupations (
+                    activity_id VARCHAR(50),
+                    occupation VARCHAR(50)
+                )
+                """,
+
+                // Table attendances
+                    """
+                CREATE TABLE IF NOT EXISTS attendances (
+                    id VARCHAR(50) PRIMARY KEY,
+                    activity_id VARCHAR(50),
+                    member_id VARCHAR(50),
+                    attendance_status VARCHAR(20)
+                )
+                """,
+
                 """
                 CREATE TABLE IF NOT EXISTS transactions (
                     id VARCHAR(50) PRIMARY KEY,
@@ -137,7 +168,7 @@ public class DatabaseConnection {
     }
 
     private void initializeSequences(Connection conn) {
-        String[] sequences = {"collectivity", "member", "fee", "payment", "transaction", "account", "official_number"};
+        String[] sequences = {"collectivity", "member", "fee", "payment", "transaction", "account", "official_number", "activity", "attendance"};
 
         for (String seq : sequences) {
             String createSeqSql = "CREATE SEQUENCE IF NOT EXISTS seq_" + seq + " START WITH 1";

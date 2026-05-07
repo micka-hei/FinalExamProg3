@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Assemblée générale mensuelle",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": ["SENIOR", "JUNIOR"],
+    "recurrenceRule": {
+      "weekOrdinal": 2,
+      "dayOfWeek": "SU"
+    }
+  }
+]

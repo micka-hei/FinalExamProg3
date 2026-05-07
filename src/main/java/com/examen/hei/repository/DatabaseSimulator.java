@@ -904,10 +904,10 @@ public class DatabaseSimulator {
 
     public void saveActivity(CollectivityActivity activity) {
         String sql = """
-            INSERT INTO activities (id, collectivity_id, label, activity_type, 
-                                   week_ordinal, day_of_week, executive_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO activities (id, collectivity_id, label, activity_type, 
+                               week_ordinal, day_of_week, executive_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """;
 
         Integer weekOrdinal = null;
         String dayOfWeek = null;
@@ -916,11 +916,14 @@ public class DatabaseSimulator {
             dayOfWeek = activity.getRecurrenceRule().getDayOfWeek();
         }
 
+        // Convertir l'enum en String pour la base de données
+        String activityType = activity.getActivityType() != null ? activity.getActivityType().name() : null;
+
         dbConnection.executeUpdate(sql,
                 activity.getId(),
                 activity.getCollectivityId(),
                 activity.getLabel(),
-                activity.getActivityType(),
+                activityType,  // Utiliser la valeur String de l'enum
                 weekOrdinal,
                 dayOfWeek,
                 activity.getExecutiveDate()
@@ -947,7 +950,12 @@ public class DatabaseSimulator {
         activity.setId((String) row.get("id"));
         activity.setCollectivityId((String) row.get("collectivity_id"));
         activity.setLabel((String) row.get("label"));
-        activity.setActivityType((String) row.get("activity_type"));
+
+        // Convertir la String en enum
+        String activityTypeStr = (String) row.get("activity_type");
+        if (activityTypeStr != null) {
+            activity.setActivityType(ActivityType.valueOf(activityTypeStr));
+        }
 
         Object executiveDate = row.get("executive_date");
         if (executiveDate instanceof LocalDate) {
@@ -1054,4 +1062,5 @@ public class DatabaseSimulator {
         }
         return attendances;
     }
+
 }
