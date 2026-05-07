@@ -956,8 +956,16 @@ public class DatabaseSimulator {
         }
 
         Object executiveDate = row.get("executive_date");
-        if (executiveDate instanceof LocalDate) {
-            activity.setExecutiveDate((LocalDate) executiveDate);
+        if (executiveDate != null) {
+            if (executiveDate instanceof LocalDate) {
+                activity.setExecutiveDate((LocalDate) executiveDate);
+            } else if (executiveDate instanceof java.sql.Date) {
+                activity.setExecutiveDate(((java.sql.Date) executiveDate).toLocalDate());
+            } else if (executiveDate instanceof String) {
+                activity.setExecutiveDate(LocalDate.parse((String) executiveDate));
+            } else if (executiveDate instanceof java.sql.Timestamp) {
+                activity.setExecutiveDate(((java.sql.Timestamp) executiveDate).toLocalDateTime().toLocalDate());
+            }
         }
 
         Object weekOrdinal = row.get("week_ordinal");
@@ -1065,14 +1073,14 @@ public class DatabaseSimulator {
         try {
             // Compter les activités où le membre était concerné
             String concernedSql = """
-                SELECT COUNT(DISTINCT a.id) as total_concerned
-                FROM activities a
-                JOIN activity_occupations ao ON ao.activity_id = a.id
-                JOIN collectivity_members cm ON cm.collectivity_id = a.collectivity_id
-                WHERE cm.member_id = ?
-                AND (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
-                AND ao.occupation = (SELECT occupation FROM members WHERE id = ?)
-            """;
+            SELECT COUNT(DISTINCT a.id) as total_concerned
+            FROM activities a
+            JOIN activity_occupations ao ON ao.activity_id = a.id
+            JOIN collectivity_members cm ON cm.collectivity_id = a.collectivity_id
+            WHERE cm.member_id = ?
+            AND (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
+            AND ao.occupation = (SELECT occupation FROM members WHERE id = ?)
+        """;
 
             List<Map<String, Object>> concernedResults = dbConnection.executeQuery(concernedSql, memberId, from, to, memberId);
             long totalConcerned = 0;
@@ -1087,21 +1095,24 @@ public class DatabaseSimulator {
                 return 0.0;
             }
 
-            // Compter les activités où le membre a été présent
+            // Compter les activités où le membre a été présent (uniquement pour les activités où il est concerné)
             String presentSql = """
-                SELECT COUNT(*) as total_present
-                FROM attendances att
-                WHERE att.member_id = ?
-                AND att.attendance_status = 'ATTENDED'
-                AND att.activity_id IN (
-                SELECT a.id FROM activities a
+            SELECT COUNT(*) as total_present
+            FROM attendances att
+            WHERE att.member_id = ?
+            AND att.attendance_status = 'ATTENDED'
+            AND att.activity_id IN (
+                SELECT DISTINCT a.id
+                FROM activities a
                 JOIN activity_occupations ao ON ao.activity_id = a.id
-                WHERE (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
+                JOIN collectivity_members cm ON cm.collectivity_id = a.collectivity_id
+                WHERE cm.member_id = ?
+                AND (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
                 AND ao.occupation = (SELECT occupation FROM members WHERE id = ?)
             )
         """;
 
-            List<Map<String, Object>> presentResults = dbConnection.executeQuery(presentSql, memberId, from, to, memberId);
+            List<Map<String, Object>> presentResults = dbConnection.executeQuery(presentSql, memberId, memberId, from, to, memberId);
             long totalPresent = 0;
             if (!presentResults.isEmpty()) {
                 Object countObj = presentResults.get(0).get("total_present");
@@ -1144,5 +1155,7 @@ public class DatabaseSimulator {
         }
         return attendances;
     }
+
+
 
 }
