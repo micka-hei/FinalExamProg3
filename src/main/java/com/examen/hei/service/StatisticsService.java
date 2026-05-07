@@ -52,6 +52,10 @@ public class StatisticsService {
             double unpaidAmount = calculateUnpaidAmount(member, activeFees, from, to);
             stat.setUnpaidAmount(unpaidAmount);
 
+            //Calcul du taux d'assiduité
+            double assiduityPercentage = calculateMemberAssiduity(member.getId().getId(), from, to);
+            stat.setAssiduityPercentage(assiduityPercentage);
+
             statistics.add(stat);
         }
 
@@ -74,6 +78,70 @@ public class StatisticsService {
         }
 
         return unpaidAmount;
+    }
+
+    //Calcul du taux d'assiduité d'un membre
+    private double calculateMemberAssiduity(String memberId, LocalDate from, LocalDate to) {
+        // Récupérer le membre
+        Member member = db.findMemberById(memberId).orElse(null);
+        if (member == null) {
+            return 0.0;
+        }
+
+        // Récupérer la collectivité du membre
+        String collectivityId = null;
+        for (Collectivity c : db.findAllCollectivities()) {
+            if (c.getMembers().stream().anyMatch(m -> m.getId().getId().equals(memberId))) {
+                collectivityId = c.getId();
+                break;
+            }
+        }
+        if (collectivityId == null) {
+            return 0.0;
+        }
+
+        // Compter le nombre d'activités où le membre était concerné (occupation match)
+        int totalConcerned = 0;
+        List<CollectivityActivity> activities = db.findActivitiesByCollectivityId(collectivityId);
+
+        for (CollectivityActivity activity : activities) {
+            // Vérifier si l'activité est dans la période
+            LocalDate activityDate = activity.getExecutiveDate();
+            if (activityDate == null && activity.getRecurrenceRule() != null) {
+                activityDate = from;
+            }
+            if (activityDate == null || activityDate.isBefore(from) || activityDate.isAfter(to)) {
+                continue;
+            }
+
+            // Vérifier si le membre est concerné par cette activité
+            List<MemberOccupation> concernedOccupations = activity.getMemberOccupationConcerned();
+            if (concernedOccupations != null && concernedOccupations.contains(member.getOccupation())) {
+                totalConcerned++;
+            }
+        }
+
+        if (totalConcerned == 0) {
+            return 0.0;
+        }
+
+        // Compter le nombre de présences du membre
+        int presentCount = 0;
+        List<ActivityMemberAttendance> attendances = db.findAttendanceByMemberId(memberId);
+        for (ActivityMemberAttendance attendance : attendances) {
+            if ("ATTENDED".equals(attendance.getAttendanceStatus())) {
+                // Vérifier que l'activité est dans la période
+                CollectivityActivity activity = db.findActivityById(attendance.getActivityId()).orElse(null);
+                if (activity != null) {
+                    LocalDate activityDate = activity.getExecutiveDate();
+                    if (activityDate != null && !activityDate.isBefore(from) && !activityDate.isAfter(to)) {
+                        presentCount++;
+                    }
+                }
+            }
+        }
+
+        return (double) presentCount / totalConcerned * 100.0;
     }
 
     public List<CollectivityOverallStatistics> getOverallStatistics(LocalDate from, LocalDate to) {
@@ -101,6 +169,10 @@ public class StatisticsService {
 
             double currentDuePercentage = calculateCurrentDuePercentage(collectivity, activeFees, from, to);
             stat.setOverallMemberCurrentDuePercentage(currentDuePercentage);
+
+            //Calcul du taux d'assiduité global de la collectivité
+            double overallAssiduity = calculateOverallAssiduity(collectivity, from, to);
+            stat.setOverallMemberAssiduityPercentage(overallAssiduity);
 
             statistics.add(stat);
         }
@@ -138,5 +210,19 @@ public class StatisticsService {
         }
 
         return (double) membersUpToDate / members.size() * 100.0;
+    }
+
+    // Calcul du taux d'assiduité global de la collectivité
+    private double calculateOverallAssiduity(Collectivity collectivity, LocalDate from, LocalDate to) {
+        List<Member> members = collectivity.getMembers();
+        if (members.isEmpty()) {
+            return 0.0;
+        }
+
+        double totalAssiduity = 0.0;
+        for (Member member : members) {
+            totalAssiduity += calculateMemberAssiduity(member.getId().getId(), from, to);
+        }
+        return totalAssiduity / members.size();
     }
 }

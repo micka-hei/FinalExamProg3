@@ -207,7 +207,7 @@ public class DatabaseSimulator {
             member.setOccupation(MemberOccupation.valueOf(occupationStr));
         }
 
-        // Important : ne pas charger les référents ici
+        // Ne pas charger les référents
         member.setReferees(new ArrayList<>());
 
         return Optional.of(member);
@@ -215,10 +215,10 @@ public class DatabaseSimulator {
 
     public void saveMember(Member member) {
         String sql = """
-            INSERT INTO members (id, first_name, last_name, birth_date, gender, 
-                                address, profession, phone_number, email, occupation, creation_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO members (id, first_name, last_name, birth_date, gender, 
+                                        address, profession, phone_number, email, occupation, creation_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         dbConnection.executeUpdate(sql,
                 member.getId().getId(),
@@ -329,9 +329,9 @@ public class DatabaseSimulator {
 
         if (collectivity.getStructure() != null) {
             String structureSql = """
-                INSERT INTO collectivity_structure (collectivity_id, president_id, vice_president_id, treasurer_id, secretary_id)
-                VALUES (?, ?, ?, ?, ?)
-            """;
+                        INSERT INTO collectivity_structure (collectivity_id, president_id, vice_president_id, treasurer_id, secretary_id)
+                        VALUES (?, ?, ?, ?, ?)
+                    """;
             dbConnection.executeUpdate(structureSql,
                     collectivity.getId(),
                     collectivity.getStructure().getPresident() != null ? collectivity.getStructure().getPresident().getId().getId() : null,
@@ -381,8 +381,6 @@ public class DatabaseSimulator {
         if (results == null || results.isEmpty()) {
             return false;
         }
-
-        // Debug: afficher le contenu
         System.out.println("existsByOfficialNumber results: " + results);
 
         Object countObj = results.get(0).get("total");
@@ -515,11 +513,11 @@ public class DatabaseSimulator {
 
     public void saveFinancialAccount(FinancialAccount account) {
         String sql = """
-            INSERT INTO financial_accounts (id, type, amount, holder_name, bank_name, 
-                                           bank_code, bank_branch_code, bank_account_number, 
-                                           bank_account_key, mobile_service, mobile_number, collectivity_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO financial_accounts (id, type, amount, holder_name, bank_name, 
+                                                   bank_code, bank_branch_code, bank_account_number, 
+                                                   bank_account_key, mobile_service, mobile_number, collectivity_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         String type = account instanceof CashAccount ? "CASH" :
                 account instanceof BankAccount ? "BANK_ACCOUNT" : "MOBILE_BANKING";
@@ -645,9 +643,9 @@ public class DatabaseSimulator {
 
     public MembershipFee saveMembershipFee(MembershipFee fee) {
         String sql = """
-            INSERT INTO membership_fees (id, eligible_from, frequency, amount, label, status)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO membership_fees (id, eligible_from, frequency, amount, label, status)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """;
 
         dbConnection.executeUpdate(sql,
                 fee.getId(),
@@ -663,9 +661,9 @@ public class DatabaseSimulator {
 
     public MemberPayment saveMemberPayment(MemberPayment payment) {
         String sql = """
-            INSERT INTO member_payments (id, member_id, membership_fee_id, amount, payment_mode, account_credited_id, creation_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO member_payments (id, member_id, membership_fee_id, amount, payment_mode, account_credited_id, creation_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
 
         dbConnection.executeUpdate(sql,
                 payment.getId(),
@@ -682,9 +680,9 @@ public class DatabaseSimulator {
 
     public CollectivityTransaction saveTransaction(CollectivityTransaction transaction) {
         String sql = """
-            INSERT INTO transactions (id, creation_date, amount, payment_mode, account_credited_id, member_id, collectivity_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO transactions (id, creation_date, amount, payment_mode, account_credited_id, member_id, collectivity_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
 
         dbConnection.executeUpdate(sql,
                 transaction.getId(),
@@ -772,16 +770,16 @@ public class DatabaseSimulator {
         System.out.println("===================================");
     }
 
-    // ========== METHODES POUR LES STATISTIQUES ==========
+    // METHODES POUR LES STATISTIQUES
 
     public Map<String, Double> getMemberPaymentsByPeriod(String collectivityId, LocalDate from, LocalDate to) {
         String sql = """
-            SELECT t.member_id, SUM(t.amount) as total_paid
-            FROM transactions t
-            WHERE t.collectivity_id = ? 
-            AND t.creation_date BETWEEN ? AND ?
-            GROUP BY t.member_id
-        """;
+                    SELECT t.member_id, SUM(t.amount) as total_paid
+                    FROM transactions t
+                    WHERE t.collectivity_id = ? 
+                    AND t.creation_date BETWEEN ? AND ?
+                    GROUP BY t.member_id
+                """;
         List<Map<String, Object>> results = dbConnection.executeQuery(sql, collectivityId, from, to);
 
         Map<String, Double> paymentsByMember = new HashMap<>();
@@ -832,10 +830,10 @@ public class DatabaseSimulator {
 
     public int getMemberPaymentsCountForFee(String memberId, String feeId, LocalDate from, LocalDate to) {
         String sql = """
-        SELECT COUNT(*) as count FROM member_payments 
-        WHERE member_id = ? AND membership_fee_id = ? 
-        AND creation_date BETWEEN ? AND ?
-    """;
+                    SELECT COUNT(*) as count FROM member_payments 
+                    WHERE member_id = ? AND membership_fee_id = ? 
+                    AND creation_date BETWEEN ? AND ?
+                """;
         List<Map<String, Object>> results = dbConnection.executeQuery(sql, memberId, feeId, from, to);
 
         if (results == null || results.isEmpty()) {
@@ -867,11 +865,11 @@ public class DatabaseSimulator {
 
     public int getNewMembersCount(String collectivityId, LocalDate from, LocalDate to) {
         String sql = """
-        SELECT COUNT(DISTINCT m.id) as new_members
-        FROM members m
-        JOIN collectivity_members cm ON cm.member_id = m.id
-        WHERE cm.collectivity_id = ? AND m.creation_date BETWEEN ? AND ?
-    """;
+                    SELECT COUNT(DISTINCT m.id) as new_members
+                    FROM members m
+                    JOIN collectivity_members cm ON cm.member_id = m.id
+                    WHERE cm.collectivity_id = ? AND m.creation_date BETWEEN ? AND ?
+                """;
         List<Map<String, Object>> results = dbConnection.executeQuery(sql, collectivityId, from, to);
 
         if (results == null || results.isEmpty()) {
@@ -900,14 +898,14 @@ public class DatabaseSimulator {
         return ((Number) countObj).intValue();
     }
 
-    // ========== METHODES POUR LES ACTIVITES (BONUS) ==========
+    // METHODES POUR LES ACTIVITES
 
     public void saveActivity(CollectivityActivity activity) {
         String sql = """
-        INSERT INTO activities (id, collectivity_id, label, activity_type, 
-                               week_ordinal, day_of_week, executive_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """;
+                    INSERT INTO activities (id, collectivity_id, label, activity_type, 
+                                           week_ordinal, day_of_week, executive_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
 
         Integer weekOrdinal = null;
         String dayOfWeek = null;
@@ -923,7 +921,7 @@ public class DatabaseSimulator {
                 activity.getId(),
                 activity.getCollectivityId(),
                 activity.getLabel(),
-                activityType,  // Utiliser la valeur String de l'enum
+                activityType,
                 weekOrdinal,
                 dayOfWeek,
                 activity.getExecutiveDate()
@@ -998,9 +996,9 @@ public class DatabaseSimulator {
 
     public void saveAttendance(ActivityMemberAttendance attendance) {
         String sql = """
-            INSERT INTO attendances (id, activity_id, member_id, attendance_status)
-            VALUES (?, ?, ?, ?)
-        """;
+                    INSERT INTO attendances (id, activity_id, member_id, attendance_status)
+                    VALUES (?, ?, ?, ?)
+                """;
 
         dbConnection.executeUpdate(sql,
                 attendance.getId(),
@@ -1039,6 +1037,90 @@ public class DatabaseSimulator {
     public List<ActivityMemberAttendance> findAttendanceByActivityId(String activityId) {
         String sql = "SELECT * FROM attendances WHERE activity_id = ?";
         List<Map<String, Object>> results = dbConnection.executeQuery(sql, activityId);
+
+        List<ActivityMemberAttendance> attendances = new ArrayList<>();
+        for (Map<String, Object> row : results) {
+            ActivityMemberAttendance attendance = new ActivityMemberAttendance();
+            attendance.setId((String) row.get("id"));
+            attendance.setActivityId((String) row.get("activity_id"));
+            attendance.setMemberId((String) row.get("member_id"));
+            attendance.setAttendanceStatus((String) row.get("attendance_status"));
+
+            findMemberById(attendance.getMemberId()).ifPresent(member -> {
+                MemberDescription desc = new MemberDescription();
+                desc.setId(member.getId().getId());
+                desc.setFirstName(member.getFirstName());
+                desc.setLastName(member.getLastName());
+                desc.setEmail(member.getEmail());
+                desc.setOccupation(member.getOccupation() != null ? member.getOccupation().name() : null);
+                attendance.setMemberDescription(desc);
+            });
+
+            attendances.add(attendance);
+        }
+        return attendances;
+    }
+
+    public double getMemberAssiduityPercentage(String memberId, LocalDate from, LocalDate to) {
+        try {
+            // Compter les activités où le membre était concerné
+            String concernedSql = """
+                SELECT COUNT(DISTINCT a.id) as total_concerned
+                FROM activities a
+                JOIN activity_occupations ao ON ao.activity_id = a.id
+                JOIN collectivity_members cm ON cm.collectivity_id = a.collectivity_id
+                WHERE cm.member_id = ?
+                AND (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
+                AND ao.occupation = (SELECT occupation FROM members WHERE id = ?)
+            """;
+
+            List<Map<String, Object>> concernedResults = dbConnection.executeQuery(concernedSql, memberId, from, to, memberId);
+            long totalConcerned = 0;
+            if (!concernedResults.isEmpty()) {
+                Object countObj = concernedResults.get(0).get("total_concerned");
+                if (countObj instanceof Number) {
+                    totalConcerned = ((Number) countObj).longValue();
+                }
+            }
+
+            if (totalConcerned == 0) {
+                return 0.0;
+            }
+
+            // Compter les activités où le membre a été présent
+            String presentSql = """
+                SELECT COUNT(*) as total_present
+                FROM attendances att
+                WHERE att.member_id = ?
+                AND att.attendance_status = 'ATTENDED'
+                AND att.activity_id IN (
+                SELECT a.id FROM activities a
+                JOIN activity_occupations ao ON ao.activity_id = a.id
+                WHERE (a.executive_date BETWEEN ? AND ? OR (a.week_ordinal IS NOT NULL AND a.day_of_week IS NOT NULL))
+                AND ao.occupation = (SELECT occupation FROM members WHERE id = ?)
+            )
+        """;
+
+            List<Map<String, Object>> presentResults = dbConnection.executeQuery(presentSql, memberId, from, to, memberId);
+            long totalPresent = 0;
+            if (!presentResults.isEmpty()) {
+                Object countObj = presentResults.get(0).get("total_present");
+                if (countObj instanceof Number) {
+                    totalPresent = ((Number) countObj).longValue();
+                }
+            }
+
+            return (double) totalPresent / totalConcerned * 100.0;
+
+        } catch (Exception e) {
+            System.err.println("Error calculating assiduity for member " + memberId + ": " + e.getMessage());
+            return 0.0;
+        }
+    }
+
+    public List<ActivityMemberAttendance> findAttendanceByMemberId(String memberId) {
+        String sql = "SELECT * FROM attendances WHERE member_id = ?";
+        List<Map<String, Object>> results = dbConnection.executeQuery(sql, memberId);
 
         List<ActivityMemberAttendance> attendances = new ArrayList<>();
         for (Map<String, Object> row : results) {

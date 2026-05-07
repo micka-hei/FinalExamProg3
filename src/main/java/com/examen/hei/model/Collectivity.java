@@ -7,8 +7,8 @@ public class Collectivity {
     private String location;
     private CollectivityStructure structure;
     private List<Member> members;
-    private String officialNumber;  // NOUVEAU
-    private String officialName;    // NOUVEAU
+    private String officialNumber;
+    private String officialName;
 
 
     public String getId() { return id; }

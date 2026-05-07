@@ -125,7 +125,6 @@ public class CollectivityService {
         return db.findCollectivityById(collectivityId).get();
     }
 
-    // Une seule méthode getCollectivityById (supprimez l'autre)
     public Optional<Collectivity> getCollectivityById(String id) {
         return db.findCollectivityById(id);
     }

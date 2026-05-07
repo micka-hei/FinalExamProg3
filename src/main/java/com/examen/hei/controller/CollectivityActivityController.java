@@ -28,7 +28,7 @@ public class CollectivityActivityController {
     @PostMapping("/{id}/activities")
     public ResponseEntity<List<CollectivityActivity>> createActivities(
             @PathVariable String id,
-            @RequestBody List<CreateCollectivityActivity> requests) {  // Enlever @Valid temporairement
+            @RequestBody List<CreateCollectivityActivity> requests) {
         List<CollectivityActivity> created = activityService.createActivities(id, requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -45,7 +45,7 @@ public class CollectivityActivityController {
     public ResponseEntity<List<ActivityMemberAttendance>> createAttendance(
             @PathVariable String id,
             @PathVariable String activityId,
-            @RequestBody List<CreateActivityMemberAttendance> requests) {  // Enlever @Valid temporairement
+            @RequestBody List<CreateActivityMemberAttendance> requests) {
         List<ActivityMemberAttendance> created = activityService.createAttendance(id, activityId, requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }

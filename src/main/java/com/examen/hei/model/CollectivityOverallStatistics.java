@@ -4,6 +4,7 @@ public class CollectivityOverallStatistics {
     private CollectivityInformation collectivityInformation;
     private int newMembersNumber;
     private double overallMemberCurrentDuePercentage;
+    private double overallMemberAssiduityPercentage;
 
     public CollectivityInformation getCollectivityInformation() {
         return collectivityInformation;
@@ -27,5 +28,13 @@ public class CollectivityOverallStatistics {
 
     public void setOverallMemberCurrentDuePercentage(double overallMemberCurrentDuePercentage) {
         this.overallMemberCurrentDuePercentage = overallMemberCurrentDuePercentage;
+    }
+
+    public double getOverallMemberAssiduityPercentage() {
+        return overallMemberAssiduityPercentage;
+    }
+
+    public void setOverallMemberAssiduityPercentage(double overallMemberAssiduityPercentage) {
+        this.overallMemberAssiduityPercentage = overallMemberAssiduityPercentage;
     }
 }

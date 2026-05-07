@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CreateCollectivityActivity {
     private String label;
-    private ActivityType activityType;  // Changé de String à ActivityType
+    private ActivityType activityType;
     private List<MemberOccupation> memberOccupationConcerned;
     private MonthlyRecurrenceRule recurrenceRule;
     private LocalDate executiveDate;

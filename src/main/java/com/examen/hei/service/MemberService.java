@@ -114,8 +114,8 @@ public class MemberService {
 
             MemberPayment payment = new MemberPayment();
             payment.setId(db.generatePaymentId());
-            payment.setMemberId(member.getId().getId());  // ← AJOUTER CETTE LIGNE
-            payment.setMembershipFeeId(fee.getId());      // ← AJOUTER CETTE LIGNE
+            payment.setMemberId(member.getId().getId());
+            payment.setMembershipFeeId(fee.getId());
             payment.setAmount(request.getAmount());
             payment.setPaymentMode(request.getPaymentMode());
             payment.setAccountCredited(account);
@@ -131,7 +131,7 @@ public class MemberService {
             transaction.setPaymentMode(request.getPaymentMode());
             transaction.setAccountCredited(account);
             transaction.setMemberDebited(member);
-            transaction.setCollectivityId(collectivityId);  // ← AJOUTER CETTE LIGNE
+            transaction.setCollectivityId(collectivityId);
 
             db.saveTransaction(transaction);
         }

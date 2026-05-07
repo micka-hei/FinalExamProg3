@@ -8,7 +8,7 @@ public class CollectivityActivity {
     private String id;
     private String collectivityId;
     private String label;
-    private ActivityType activityType;  // Changé de String à ActivityType
+    private ActivityType activityType;
     private List<MemberOccupation> memberOccupationConcerned;
     private MonthlyRecurrenceRule recurrenceRule;
     private LocalDate executiveDate;
