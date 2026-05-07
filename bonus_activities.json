@@ -1,0 +1,69 @@
+[
+  {
+    "collectivityId": "COL-1",
+    "label": "AG1",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": ["JUNIOR", "SENIOR", "SECRETARY", "TREASURER", "VICE_PRESIDENT", "PRESIDENT"],
+    "recurrenceRule": {
+      "weekOrdinal": 1,
+      "dayOfWeek": "SA"
+    }
+  },
+  {
+    "collectivityId": "COL-1",
+    "label": "Formation de base",
+    "activityType": "TRAINING",
+    "memberOccupationConcerned": ["JUNIOR"],
+    "recurrenceRule": {
+      "weekOrdinal": 2,
+      "dayOfWeek": "SU"
+    }
+  },
+  {
+    "collectivityId": "COL-2",
+    "label": "AG2",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": ["JUNIOR", "SENIOR", "SECRETARY", "TREASURER", "VICE_PRESIDENT", "PRESIDENT"],
+    "recurrenceRule": {
+      "weekOrdinal": 1,
+      "dayOfWeek": "SU"
+    }
+  },
+  {
+    "collectivityId": "COL-2",
+    "label": "Formation de base",
+    "activityType": "TRAINING",
+    "memberOccupationConcerned": ["JUNIOR"],
+    "recurrenceRule": {
+      "weekOrdinal": 3,
+      "dayOfWeek": "SU"
+    }
+  },
+  {
+    "collectivityId": "COL-2",
+    "label": "Perfectionnement",
+    "activityType": "OTHER",
+    "memberOccupationConcerned": ["SENIOR"],
+    "executiveDate": "2026-04-30"
+  },
+  {
+    "collectivityId": "COL-3",
+    "label": "AG3",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": ["JUNIOR", "SENIOR", "SECRETARY", "TREASURER", "VICE_PRESIDENT", "PRESIDENT"],
+    "recurrenceRule": {
+      "weekOrdinal": 1,
+      "dayOfWeek": "FR"
+    }
+  },
+  {
+    "collectivityId": "COL-3",
+    "label": "Formation de base",
+    "activityType": "TRAINING",
+    "memberOccupationConcerned": ["JUNIOR"],
+    "recurrenceRule": {
+      "weekOrdinal": 4,
+      "dayOfWeek": "WE"
+    }
+  }
+]

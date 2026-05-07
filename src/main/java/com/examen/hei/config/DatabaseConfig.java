@@ -26,7 +26,7 @@ public class DatabaseConfig {
                 return DriverManager.getConnection(
                         "jdbc:postgresql://localhost:5432/federation_db",
                         "postgres",
-                        "postgres"
+                        "postgres123"
                 );
             }
 
